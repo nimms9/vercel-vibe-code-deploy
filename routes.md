@@ -15,9 +15,9 @@
 ## Auth
 /signup — Create account
 /login — Sign in
-/forgot-password — Password reset request
-/reset-password — Set new password
-/verify-email — Email verification
+/forgot-password — Password reset request (planned stub)
+/reset-password — Set new password (planned stub)
+/verify-email — Email verification (planned stub)
 
 ## App (Protected via Middleware)
 /dashboard — User home

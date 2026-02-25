@@ -52,7 +52,7 @@ Open `http://localhost:3000`.
 - `npm run prisma:seed` — Seed demo user
 
 ## Route Highlights
-See `routes.md` for the human-readable route map.
+See `routes.md` for the human-readable route map. Open `routes.md` for judges.
 
 ## Notes
 - Guidance is informational and not medical advice.
