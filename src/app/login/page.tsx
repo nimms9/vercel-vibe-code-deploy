@@ -18,6 +18,7 @@ function LoginForm() {
   const [status, setStatus] = useState<string | null>(null);
 
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+  const signupSuccess = searchParams.get("signup") === "success";
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -47,6 +48,11 @@ function LoginForm() {
         <p className="mt-2 text-sm text-[var(--slate)]">
           Demo account: demo@vitalens.app / DemoPass123!
         </p>
+        {signupSuccess ? (
+          <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+            Account created. Please sign in to continue.
+          </div>
+        ) : null}
         <form className="mt-6 grid gap-4" onSubmit={handleSubmit}>
           <input
             type="email"

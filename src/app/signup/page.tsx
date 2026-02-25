@@ -46,7 +46,7 @@ export default function SignupPage() {
     const res = await fetch("/api/auth/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, confirmPassword }),
     });
     if (!res.ok) {
       const data = await res.json();
@@ -55,9 +55,8 @@ export default function SignupPage() {
       setLoading(false);
       return;
     }
-    await signIn("credentials", { redirect: false, email, password });
     setStatus(null);
-    router.push("/dashboard");
+    router.push("/login?signup=success");
   };
 
   return (

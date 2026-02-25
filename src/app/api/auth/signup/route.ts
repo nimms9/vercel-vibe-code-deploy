@@ -2,8 +2,15 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import prisma from "@/lib/prisma";
 import { signupSchema } from "@/lib/validators";
+import { getClientIp, rateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
+  const ip = getClientIp(request.headers);
+  const limiter = rateLimit(`signup:${ip}`, { windowMs: 60_000, max: 20 });
+  if (!limiter.allowed) {
+    return NextResponse.json({ error: "Too many requests. Try again shortly." }, { status: 429 });
+  }
+
   const body = await request.json();
   const parsed = signupSchema.safeParse(body);
   if (!parsed.success) {

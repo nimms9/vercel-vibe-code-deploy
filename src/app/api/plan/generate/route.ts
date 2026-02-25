@@ -3,11 +3,18 @@ import prisma from "@/lib/prisma";
 import { requireSession } from "@/lib/session";
 import { generatePlan } from "@/lib/plan";
 import { generatePlanSchema } from "@/lib/validators";
+import { getClientIp, rateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   const session = await requireSession();
   if (!session?.user?.email) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const ip = getClientIp(request.headers);
+  const limiter = rateLimit(`plan-generate:${ip}`, { windowMs: 5 * 60_000, max: 20 });
+  if (!limiter.allowed) {
+    return NextResponse.json({ error: "Too many requests. Try again shortly." }, { status: 429 });
   }
 
   const body = await request.json().catch(() => ({}));

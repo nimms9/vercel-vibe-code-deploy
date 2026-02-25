@@ -31,6 +31,7 @@
 ## API (Route Handlers)
 POST /api/plan/generate — Generate or update vitamin plan (auth required)
 GET /api/plan — Fetch current plan (auth required)
+GET /api/plan/history — Fetch plan history (auth required)
 POST /api/profile — Save user profile (auth required)
 GET /api/profile — Fetch user profile (auth required)
 GET /api/vitamins — List vitamins & metadata (public)
