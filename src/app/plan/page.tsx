@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import AppShell from "@/components/app-shell";
+import { ErrorBanner, LoadingPill } from "@/components/ui-feedback";
 
 type PlanRecord = {
   recommendations: string;
@@ -22,17 +23,25 @@ export default function PlanPage() {
   const [items, setItems] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const loadPlan = async () => {
     setLoading(true);
-    const res = await fetch("/api/plan");
-    if (res.ok) {
-      const data = await res.json();
-      if (data.plan) {
-        const parsed = JSON.parse(data.plan.recommendations || "{}");
-        setPlan(data.plan);
-        setItems(parsed.items || []);
+    setError(null);
+    try {
+      const res = await fetch("/api/plan");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.plan) {
+          const parsed = JSON.parse(data.plan.recommendations || "{}");
+          setPlan(data.plan);
+          setItems(parsed.items || []);
+        }
+      } else {
+        setError("Unable to load plan. Please retry.");
       }
+    } catch {
+      setError("Unable to load plan. Please retry.");
     }
     setLoading(false);
   };
@@ -43,12 +52,19 @@ export default function PlanPage() {
 
   const generate = async () => {
     setStatus("Generating…");
-    const res = await fetch("/api/plan/generate", { method: "POST" });
-    if (res.ok) {
-      await loadPlan();
-      setStatus("Plan updated.");
-    } else {
-      setStatus("Unable to generate plan. Complete your profile first.");
+    setError(null);
+    try {
+      const res = await fetch("/api/plan/generate", { method: "POST" });
+      if (res.ok) {
+        await loadPlan();
+        setStatus("Plan updated.");
+      } else {
+        setError("Unable to generate plan. Complete your profile first.");
+        setStatus(null);
+      }
+    } catch {
+      setError("Unable to generate plan. Please retry.");
+      setStatus(null);
     }
   };
 
@@ -59,12 +75,16 @@ export default function PlanPage() {
           <button
             type="button"
             onClick={generate}
-            className="rounded-full bg-[var(--moss)] px-5 py-2 text-sm font-semibold text-white"
+            className="rounded-full bg-[var(--moss)] px-5 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-70"
+            disabled={loading || status === "Generating…"}
           >
             Generate plan
           </button>
           {status ? <span className="text-sm text-[var(--slate)]">{status}</span> : null}
         </div>
+
+        {loading ? <LoadingPill label="Loading plan…" /> : null}
+        {error ? <ErrorBanner message={error} onRetry={loadPlan} /> : null}
 
         {loading ? (
           <div className="glass rounded-3xl p-6">Loading plan…</div>

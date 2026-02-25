@@ -4,6 +4,7 @@ import { Suspense, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import MarketingShell from "@/components/marketing-shell";
+import { ErrorBanner, LoadingPill } from "@/components/ui-feedback";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +15,7 @@ function LoginForm() {
   const [password, setPassword] = useState("DemoPass123!");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState<string | null>(null);
 
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
 
@@ -21,6 +23,7 @@ function LoginForm() {
     event.preventDefault();
     setLoading(true);
     setError(null);
+    setStatus("Authenticating…");
     const result = await signIn("credentials", {
       redirect: false,
       email,
@@ -30,8 +33,10 @@ function LoginForm() {
     setLoading(false);
     if (result?.error) {
       setError("Invalid credentials. Try the demo account.");
+      setStatus(null);
       return;
     }
+    setStatus(null);
     router.push(callbackUrl);
   };
 
@@ -57,15 +62,16 @@ function LoginForm() {
             className="rounded-2xl border border-[rgba(31,59,47,0.2)] bg-white/80 px-4 py-3 text-sm"
             placeholder="Password"
           />
-          {error ? <p className="text-sm text-red-600">{error}</p> : null}
+          {status ? <LoadingPill label={status} /> : null}
           <button
             type="submit"
             disabled={loading}
-            className="rounded-full bg-[var(--moss)] px-5 py-3 text-sm font-semibold text-white"
+            className="rounded-full bg-[var(--moss)] px-5 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-70"
           >
             {loading ? "Signing in…" : "Sign in"}
           </button>
         </form>
+        {error ? <ErrorBanner message={error} /> : null}
       </div>
     </section>
   );

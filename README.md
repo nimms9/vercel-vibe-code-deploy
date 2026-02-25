@@ -58,3 +58,7 @@ See `routes.md` for the human-readable route map.
 - Guidance is informational and not medical advice.
 - Plan generation is rule-based for deterministic demo behavior.
 
+## Observing Loading & Error States
+- Signup/Login: submit with an invalid password to see inline error banners and disabled buttons.
+- Profile: disconnect network or block `/api/profile` to see the retry banner.
+- Plan: click “Generate plan” without completing profile to see a clear error state.

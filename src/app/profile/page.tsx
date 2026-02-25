@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import AppShell from "@/components/app-shell";
+import { ErrorBanner, LoadingPill } from "@/components/ui-feedback";
 
 const goalsOptions = ["energy", "sleep", "stress", "fitness", "immunity"];
 const ageRanges = ["18-24", "25-29", "30-39", "40-49", "50-59", "60+"];
@@ -19,22 +20,33 @@ export default function ProfilePage() {
     healthFlags: { pregnancy: false, anticoagulants: false, thyroidMeds: false },
   });
   const [status, setStatus] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
-      const res = await fetch("/api/profile");
-      if (!res.ok) return;
-      const data = await res.json();
-      if (data.profile) {
-        setForm({
-          ageRange: data.profile.ageRange,
-          sex: data.profile.sex ?? "female",
-          dietStyle: data.profile.dietStyle,
-          goals: JSON.parse(data.profile.goals || "[]"),
-          allergies: data.profile.allergies || "",
-          budget: data.profile.budget,
-          healthFlags: JSON.parse(data.profile.healthFlags || "{}"),
-        });
+      try {
+        setLoading(true);
+        setError(null);
+        const res = await fetch("/api/profile");
+        if (!res.ok) {
+          setError("Unable to load profile. Please retry.");
+          return;
+        }
+        const data = await res.json();
+        if (data.profile) {
+          setForm({
+            ageRange: data.profile.ageRange,
+            sex: data.profile.sex ?? "female",
+            dietStyle: data.profile.dietStyle,
+            goals: JSON.parse(data.profile.goals || "[]"),
+            allergies: data.profile.allergies || "",
+            budget: data.profile.budget,
+            healthFlags: JSON.parse(data.profile.healthFlags || "{}"),
+          });
+        }
+      } finally {
+        setLoading(false);
       }
     };
     load();
@@ -50,24 +62,38 @@ export default function ProfilePage() {
 
   const handleSave = async (generatePlan: boolean) => {
     setStatus("Saving…");
-    const res = await fetch("/api/profile", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-    if (!res.ok) {
-      setStatus("Save failed.");
-      return;
+    setError(null);
+    try {
+      const res = await fetch("/api/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) {
+        setError("Save failed. Please retry.");
+        setStatus(null);
+        return;
+      }
+      if (generatePlan) {
+        const planRes = await fetch("/api/plan/generate", { method: "POST" });
+        if (!planRes.ok) {
+          setError("Plan generation failed. Please retry.");
+          setStatus(null);
+          return;
+        }
+      }
+      setStatus(generatePlan ? "Saved & plan generated." : "Saved.");
+    } catch {
+      setError("Save failed. Please retry.");
+      setStatus(null);
     }
-    if (generatePlan) {
-      await fetch("/api/plan/generate", { method: "POST" });
-    }
-    setStatus(generatePlan ? "Saved & plan generated." : "Saved.");
   };
 
   return (
     <AppShell title="Profile" subtitle="Update your preferences to personalize your plan.">
       <div className="grid gap-6">
+        {loading ? <LoadingPill label="Loading profile…" /> : null}
+        {error ? <ErrorBanner message={error} onRetry={() => window.location.reload()} /> : null}
         <div className="glass rounded-3xl p-6">
           <div className="grid gap-4 lg:grid-cols-2">
             <label className="grid gap-2 text-sm font-semibold text-[var(--slate)]">
@@ -76,6 +102,7 @@ export default function ProfilePage() {
                 value={form.ageRange}
                 onChange={(event) => setForm({ ...form, ageRange: event.target.value })}
                 className="rounded-2xl border border-[rgba(31,59,47,0.2)] bg-white/80 px-4 py-3 text-sm"
+                disabled={loading}
               >
                 {ageRanges.map((range) => (
                   <option key={range}>{range}</option>
@@ -88,6 +115,7 @@ export default function ProfilePage() {
                 value={form.sex}
                 onChange={(event) => setForm({ ...form, sex: event.target.value })}
                 className="rounded-2xl border border-[rgba(31,59,47,0.2)] bg-white/80 px-4 py-3 text-sm"
+                disabled={loading}
               >
                 <option value="female">Female</option>
                 <option value="male">Male</option>
@@ -101,6 +129,7 @@ export default function ProfilePage() {
                 value={form.dietStyle}
                 onChange={(event) => setForm({ ...form, dietStyle: event.target.value })}
                 className="rounded-2xl border border-[rgba(31,59,47,0.2)] bg-white/80 px-4 py-3 text-sm"
+                disabled={loading}
               >
                 {dietOptions.map((option) => (
                   <option key={option}>{option}</option>
@@ -113,6 +142,7 @@ export default function ProfilePage() {
                 value={form.budget}
                 onChange={(event) => setForm({ ...form, budget: event.target.value })}
                 className="rounded-2xl border border-[rgba(31,59,47,0.2)] bg-white/80 px-4 py-3 text-sm"
+                disabled={loading}
               >
                 {budgetOptions.map((option) => (
                   <option key={option}>{option}</option>
@@ -130,6 +160,7 @@ export default function ProfilePage() {
                 key={goal}
                 type="button"
                 onClick={() => toggleGoal(goal)}
+                disabled={loading}
                 className={`rounded-full px-4 py-2 text-xs font-semibold transition ${
                   form.goals.includes(goal)
                     ? "bg-[var(--moss)] text-white"
@@ -150,6 +181,7 @@ export default function ProfilePage() {
               onChange={(event) => setForm({ ...form, allergies: event.target.value })}
               className="rounded-2xl border border-[rgba(31,59,47,0.2)] bg-white/80 px-4 py-3 text-sm"
               placeholder="Nuts, Shellfish, Soy"
+              disabled={loading}
             />
           </label>
         </div>
@@ -172,6 +204,7 @@ export default function ProfilePage() {
                       healthFlags: { ...form.healthFlags, [flag.key]: event.target.checked },
                     })
                   }
+                  disabled={loading}
                 />
                 {flag.label}
               </label>
@@ -183,14 +216,16 @@ export default function ProfilePage() {
           <button
             type="button"
             onClick={() => handleSave(false)}
-            className="rounded-full bg-[var(--moss)] px-5 py-2 text-sm font-semibold text-white"
+            className="rounded-full bg-[var(--moss)] px-5 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-70"
+            disabled={loading}
           >
             Save
           </button>
           <button
             type="button"
             onClick={() => handleSave(true)}
-            className="rounded-full border border-[rgba(31,59,47,0.2)] bg-white/80 px-5 py-2 text-sm font-semibold text-[var(--moss)]"
+            className="rounded-full border border-[rgba(31,59,47,0.2)] bg-white/80 px-5 py-2 text-sm font-semibold text-[var(--moss)] disabled:cursor-not-allowed disabled:opacity-70"
+            disabled={loading}
           >
             Save & generate plan
           </button>

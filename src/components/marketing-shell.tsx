@@ -20,6 +20,9 @@ export default function MarketingShell({ children }: { children: React.ReactNode
             <Link href="/science" className="rounded-full px-4 py-2 transition hover:bg-white/80 hover:text-[var(--ink)]">
               Science
             </Link>
+            <Link href="/signup" className="rounded-full px-4 py-2 transition hover:bg-white/80 hover:text-[var(--ink)]">
+              Sign up
+            </Link>
             <Link href="/login" className="rounded-full px-4 py-2 transition hover:bg-white/80 hover:text-[var(--ink)]">
               Login
             </Link>
