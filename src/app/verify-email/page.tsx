@@ -7,6 +7,7 @@ export default function VerifyEmailPage() {
         <div className="glass rounded-3xl p-8">
           <h1 className="font-display text-3xl text-[var(--ink)]">Verify your email</h1>
           <p className="mt-3 text-sm text-[var(--slate)]">
+            This is a placeholder verification screen for the hackathon demo.
             Check your inbox for a verification link. You can close this page once verified.
           </p>
         </div>
