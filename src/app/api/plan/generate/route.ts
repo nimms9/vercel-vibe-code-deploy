@@ -2,11 +2,18 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { requireSession } from "@/lib/session";
 import { generatePlan } from "@/lib/plan";
+import { generatePlanSchema } from "@/lib/validators";
 
 export async function POST(request: Request) {
   const session = await requireSession();
   if (!session?.user?.email) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const body = await request.json().catch(() => ({}));
+  const parsed = generatePlanSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 
   const user = await prisma.user.findUnique({
@@ -44,6 +51,7 @@ export async function POST(request: Request) {
     plan: {
       ...saved,
       recommendations: plan,
+      profileSnapshot,
     },
   });
 }

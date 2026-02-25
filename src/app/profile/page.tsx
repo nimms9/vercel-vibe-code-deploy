@@ -33,18 +33,18 @@ export default function ProfilePage() {
           setError("Unable to load profile. Please retry.");
           return;
         }
-        const data = await res.json();
-        if (data.profile) {
-          setForm({
-            ageRange: data.profile.ageRange,
-            sex: data.profile.sex ?? "female",
-            dietStyle: data.profile.dietStyle,
-            goals: JSON.parse(data.profile.goals || "[]"),
-            allergies: data.profile.allergies || "",
-            budget: data.profile.budget,
-            healthFlags: JSON.parse(data.profile.healthFlags || "{}"),
-          });
-        }
+      const data = await res.json();
+      if (data.profile) {
+        setForm({
+          ageRange: data.profile.ageRange,
+          sex: data.profile.sex ?? "female",
+          dietStyle: data.profile.dietStyle,
+          goals: data.profile.goals || [],
+          allergies: data.profile.allergies || "",
+          budget: data.profile.budget,
+          healthFlags: data.profile.healthFlags || {},
+        });
+      }
       } finally {
         setLoading(false);
       }

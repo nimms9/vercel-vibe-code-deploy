@@ -1,10 +1,15 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import prisma from "@/lib/prisma";
+import { signupSchema } from "@/lib/validators";
 
 export async function POST(request: Request) {
   const body = await request.json();
-  const { email, password } = body ?? {};
+  const parsed = signupSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Invalid signup data." }, { status: 400 });
+  }
+  const { email, password } = parsed.data;
 
   if (!email || !password) {
     return NextResponse.json({ error: "Email and password are required." }, { status: 400 });

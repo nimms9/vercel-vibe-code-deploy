@@ -21,7 +21,12 @@ export async function GET(request: Request) {
       where: { userId: user.id },
       orderBy: { createdAt: "desc" },
     });
-    return NextResponse.json({ plans });
+    const normalized = plans.map((item) => ({
+      ...item,
+      recommendations: JSON.parse(item.recommendations || "{}"),
+      profileSnapshot: JSON.parse(item.profileSnapshot || "{}"),
+    }));
+    return NextResponse.json({ plans: normalized });
   }
 
   const plan = await prisma.plan.findFirst({
@@ -29,5 +34,15 @@ export async function GET(request: Request) {
     orderBy: { createdAt: "desc" },
   });
 
-  return NextResponse.json({ plan });
+  if (!plan) {
+    return NextResponse.json({ plan: null });
+  }
+
+  return NextResponse.json({
+    plan: {
+      ...plan,
+      recommendations: JSON.parse(plan.recommendations || "{}"),
+      profileSnapshot: JSON.parse(plan.profileSnapshot || "{}"),
+    },
+  });
 }

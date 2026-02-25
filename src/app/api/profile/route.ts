@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { requireSession } from "@/lib/session";
+import { profileSchema } from "@/lib/validators";
 
 export async function GET() {
   const session = await requireSession();
@@ -13,7 +14,17 @@ export async function GET() {
     include: { profile: true },
   });
 
-  return NextResponse.json({ profile: user?.profile ?? null });
+  if (!user?.profile) {
+    return NextResponse.json({ profile: null });
+  }
+
+  return NextResponse.json({
+    profile: {
+      ...user.profile,
+      goals: JSON.parse(user.profile.goals || "[]"),
+      healthFlags: JSON.parse(user.profile.healthFlags || "{}"),
+    },
+  });
 }
 
 export async function POST(request: Request) {
@@ -23,7 +34,11 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json();
-  const { ageRange, sex, dietStyle, goals, allergies, budget, healthFlags } = body;
+  const parsed = profileSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Invalid profile data." }, { status: 400 });
+  }
+  const { ageRange, sex, dietStyle, goals, allergies, budget, healthFlags } = parsed.data;
 
   if (!ageRange || !dietStyle || !goals || !budget) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -57,5 +72,11 @@ export async function POST(request: Request) {
     },
   });
 
-  return NextResponse.json({ profile });
+  return NextResponse.json({
+    profile: {
+      ...profile,
+      goals: JSON.parse(profile.goals || "[]"),
+      healthFlags: JSON.parse(profile.healthFlags || "{}"),
+    },
+  });
 }
