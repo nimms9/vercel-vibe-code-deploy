@@ -54,6 +54,9 @@ Open `http://localhost:3000`.
 ## Route Highlights
 See `routes.md` for the human-readable route map. Open `routes.md` for judges.
 
+## Path Aliases
+The `@` alias maps to `src/`. Shared helpers live in `src/lib` (for example: `@/lib/prisma`).
+
 ## Notes
 - Guidance is informational and not medical advice.
 - Plan generation is rule-based for deterministic demo behavior.
@@ -62,3 +65,10 @@ See `routes.md` for the human-readable route map. Open `routes.md` for judges.
 - Signup/Login: submit with an invalid password to see inline error banners and disabled buttons.
 - Profile: disconnect network or block `/api/profile` to see the retry banner.
 - Plan: click “Generate plan” without completing profile to see a clear error state.
+
+## Judge Steps (Copy/Paste)
+1. Open the app homepage.
+2. Sign up or log in with the demo account (`demo@vitalens.app` / `DemoPass123!`).
+3. Complete the Profile form and click “Save & generate plan.”
+4. Visit `/plan` to view the generated recommendations.
+5. Visit `/history` to confirm prior plans are listed.

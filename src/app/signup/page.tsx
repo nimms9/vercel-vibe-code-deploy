@@ -32,6 +32,11 @@ export default function SignupPage() {
       setLoading(false);
       return;
     }
+    if (!/[A-Z]/.test(password) || !/[0-9]/.test(password) || !/[^A-Za-z0-9]/.test(password)) {
+      setFieldError("Password must include an uppercase letter, a number, and a symbol.");
+      setLoading(false);
+      return;
+    }
     if (password !== confirmPassword) {
       setFieldError("Passwords do not match.");
       setLoading(false);

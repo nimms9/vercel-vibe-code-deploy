@@ -32,6 +32,12 @@
 - safetyNotes (string)
 - createdAt
 
+## Future Postgres Upgrade (Optional)
+When running on Postgres, consider storing JSON fields as `JSONB` instead of `TEXT`:
+- Profile: `goals`, `healthFlags`
+- Plan: `profileSnapshot`, `recommendations`
+This enables native JSON querying and validation without changing the core MVP logic.
+
 ## Recommendation JSON Shape (example)
 ```json
 {

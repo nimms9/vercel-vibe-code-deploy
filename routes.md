@@ -29,11 +29,11 @@
 /settings — Account, notifications, billing
 
 ## API (Route Handlers)
-POST /api/plan/generate — Generate or update vitamin plan
-GET /api/plan — Fetch current plan
-POST /api/profile — Save user profile
-GET /api/profile — Fetch user profile
-GET /api/vitamins — List vitamins & metadata
-GET /api/sources — Food sources & allergens
-GET /api/supplements/search — Search supplements catalog
-POST /api/feedback — Collect user feedback
+POST /api/plan/generate — Generate or update vitamin plan (auth required)
+GET /api/plan — Fetch current plan (auth required)
+POST /api/profile — Save user profile (auth required)
+GET /api/profile — Fetch user profile (auth required)
+GET /api/vitamins — List vitamins & metadata (public)
+GET /api/sources — Food sources & allergens (public)
+GET /api/supplements/search — Search supplements catalog (public)
+POST /api/feedback — Collect user feedback (public)
