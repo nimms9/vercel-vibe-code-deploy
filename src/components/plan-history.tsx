@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 type Plan = {
   id: string;
   createdAt: string;
-  recommendations: string;
+  recommendations: { items?: { name?: string }[] } | string;
   estimatedCost: string;
 };
 
@@ -36,7 +36,10 @@ export default function PlanHistory() {
   return (
     <div className="grid gap-4">
       {plans.map((plan) => {
-        const parsed = JSON.parse(plan.recommendations || "{}");
+        const parsed =
+          typeof plan.recommendations === "string"
+            ? JSON.parse(plan.recommendations || "{}")
+            : plan.recommendations ?? {};
         const summary = parsed?.items?.[0]?.name ?? "Personalized plan";
         return (
           <div key={plan.id} className="glass rounded-3xl p-5">

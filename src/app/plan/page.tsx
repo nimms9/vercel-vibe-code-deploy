@@ -5,7 +5,7 @@ import AppShell from "@/components/app-shell";
 import { ErrorBanner, LoadingPill } from "@/components/ui-feedback";
 
 type PlanRecord = {
-  recommendations: string;
+  recommendations: { items?: Recommendation[] } | string;
   safetyNotes: string;
   createdAt: string;
 };
@@ -33,7 +33,10 @@ export default function PlanPage() {
       if (res.ok) {
         const data = await res.json();
         if (data.plan) {
-          const parsed = JSON.parse(data.plan.recommendations || "{}");
+          const parsed =
+            typeof data.plan.recommendations === "string"
+              ? JSON.parse(data.plan.recommendations || "{}")
+              : data.plan.recommendations ?? {};
           setPlan(data.plan);
           setItems(parsed.items || []);
         }
